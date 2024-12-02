@@ -1,0 +1,24 @@
+[
+  {
+    "key": "BaseUrl",
+    "type": "input",
+    "defaultValue": "https://planon.<companyName>.nl",
+    "templateOptions": {
+      "label": "BaseUrl",
+      "description": "The baseUrl to connect to the API",
+      "placeholder": "Please enter some text",
+      "required": true
+    }
+  },
+  {
+    "key": "AuthToken",
+    "type": "input",
+    "defaultValue": "",
+    "templateOptions": {
+      "label": "Authentication Token",
+      "description": "The Authentication Token to connect to the API",
+      "type": "password",
+      "required": false
+    }
+  }
+]
