@@ -89,9 +89,9 @@ The connector makes use of two resource scripts to create the necessary function
 
 In these resource scripts, there is a GET call used to retrieve the functions and departments, but it requires an empty object to be sent in the request body, which appears somewhat unusual in the code.
 
-The department resource script requires a value with a dot to be selected in HelloId. For example _Department.Displayname_.
+The department resource script requires two value's a displayname and externalid. For example _Department_.
 
-The function resource script requires two value's a displayname and a code. For example _Title_.
+The function resource script requires two value's a name and externalid. For example _Title_.
 
 
 
