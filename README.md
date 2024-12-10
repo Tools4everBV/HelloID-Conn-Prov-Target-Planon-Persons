@@ -1,4 +1,7 @@
 # HelloID-Conn-Prov-Target-Planon-Persons
+| :warning: Warning |
+|:---------------------------|
+| Planon uses an API which needs to be configured for each customer by a Planon consultant. Therefore this connector will **not work** out of the box without assistance from a Planon consultant and HelloID consultant  
 
 > [!IMPORTANT]
 > This repository contains the connector and configuration code only. The implementer is responsible to acquire the connection details such as username, password, certificate, etc. You might even need to sign a contract or agreement with the supplier before implementing this connector. Please contact the client's application manager to coordinate the connector requirements.
@@ -38,10 +41,12 @@ _HelloID-Conn-Prov-Target-Planon-Persons_ is a _target_ connector. _Planon-Perso
 
 The following settings are required to connect to the API.
 
-| Setting   | Description                         | Mandatory |
-| --------- | ----------------------------------- | --------- |
-| AuthToken | The AuthToken to connect to the API | Yes       |
-| BaseUrl   | The URL to the API                  | Yes       |
+| Setting           | Description                                       | Mandatory |
+| ----------------- | ------------------------------------------------- | --------- |
+| AuthToken         | The AuthToken to connect to the API               | Yes       |
+| BaseUrl           | The URL to the API                                | Yes       |
+| RenameResources   | When enabled, rename departments and functions    | Yes       |
+
 
 ### Correlation configuration
 

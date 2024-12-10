@@ -82,22 +82,30 @@ try {
         "`$DepartmentRef"     = $correlatedAccount.DepartmentRef
         "`$EmploymenttypeRef" = $correlatedAccount.EmploymenttypeRef
         "`$DisplayTypeRef"    = $correlatedAccount.DisplayTypeRef
+        "`$FreeString41"      = $correlatedAccount.FreeString41
+        "`$PersonPositionRef" = $correlatedAccount.PersonPositionRef
     } -Force
 
     $correlatedAccount.PSObject.Properties.Remove('DepartmentRef')
     $correlatedAccount.PSObject.Properties.Remove('EmploymenttypeRef')
     $correlatedAccount.PSObject.Properties.Remove('DisplayTypeRef')
+    $correlatedAccount.PSObject.Properties.Remove('FreeString41')
+    $correlatedAccount.PSObject.Properties.Remove('PersonPositionRef')
 
     # Rename properties for actionContext.Data
     $actionContext.Data | Add-Member @{
         "`$DepartmentRef"     = $actionContext.Data.DepartmentRef
         "`$EmploymenttypeRef" = $actionContext.Data.EmploymenttypeRef
         "`$DisplayTypeRef"    = $actionContext.Data.DisplayTypeRef
+        "`$FreeString41"      = $actionContext.Data.FreeString41
+        "`$PersonPositionRef" = $actionContext.Data.PersonPositionRef
     } -Force
 
     $actionContext.Data.PSObject.Properties.Remove('DepartmentRef')
     $actionContext.Data.PSObject.Properties.Remove('EmploymenttypeRef')
     $actionContext.Data.PSObject.Properties.Remove('DisplayTypeRef')
+    $actionContext.Data.PSObject.Properties.Remove('FreeString41')
+    $actionContext.Data.PSObject.Properties.Remove('PersonPositionRef')
 
     # Always compare the account against the current account in target system
     if ($correlatedAccount.count -eq 1) {
@@ -180,6 +188,7 @@ try {
             break
         }
     }
+    $outputContext.Data = $actionContext.Data
 } catch {
     $outputContext.Success  = $false
     $ex = $PSItem
