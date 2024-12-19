@@ -1,4 +1,7 @@
 # HelloID-Conn-Prov-Target-Planon-Persons
+| :warning: Warning |
+|:---------------------------|
+| Planon uses an API which needs to be configured for each customer by a Planon consultant. Therefore this connector will **not work** out of the box without assistance from a Planon consultant and HelloID consultant  
 
 > [!IMPORTANT]
 > This repository contains the connector and configuration code only. The implementer is responsible to acquire the connection details such as username, password, certificate, etc. You might even need to sign a contract or agreement with the supplier before implementing this connector. Please contact the client's application manager to coordinate the connector requirements.
@@ -38,10 +41,12 @@ _HelloID-Conn-Prov-Target-Planon-Persons_ is a _target_ connector. _Planon-Perso
 
 The following settings are required to connect to the API.
 
-| Setting   | Description                         | Mandatory |
-| --------- | ----------------------------------- | --------- |
-| AuthToken | The AuthToken to connect to the API | Yes       |
-| BaseUrl   | The URL to the API                  | Yes       |
+| Setting           | Description                                       | Mandatory |
+| ----------------- | ------------------------------------------------- | --------- |
+| AuthToken         | The AuthToken to connect to the API               | Yes       |
+| BaseUrl           | The URL to the API                                | Yes       |
+| RenameResources   | When enabled, rename departments and functions    | Yes       |
+
 
 ### Correlation configuration
 
@@ -84,9 +89,9 @@ The connector makes use of two resource scripts to create the necessary function
 
 In these resource scripts, there is a GET call used to retrieve the functions and departments, but it requires an empty object to be sent in the request body, which appears somewhat unusual in the code.
 
-The department resource script requires a value with a dot to be selected in HelloId. For example _Department.Displayname_.
+The department resource script requires two value's a displayname and externalid. For example _Department_.
 
-The function resource script requires two value's a displayname and a code. For example _Title_.
+The function resource script requires two value's a name and externalid. For example _Title_.
 
 
 
