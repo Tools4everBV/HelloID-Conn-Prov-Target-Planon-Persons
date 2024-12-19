@@ -105,6 +105,15 @@ try {
                 "`$PersonPositionRef" = $actionContext.Data.PersonPositionRef
             } -Force
 
+            if([String]::IsNullOrEmpty($actionContext.Data.FreeString41))
+            {
+                $actionContext.Data.PSObject.Properties.Remove("`$FreeString41")
+            }
+            if([String]::IsNullOrEmpty($actionContext.Data.PersonPositionRef))
+            {
+                $actionContext.Data.PSObject.Properties.Remove("`$PersonPositionRef")
+            }
+
             $actionContext.Data.PSObject.Properties.Remove('DepartmentRef')
             $actionContext.Data.PSObject.Properties.Remove('EmploymenttypeRef')
             $actionContext.Data.PSObject.Properties.Remove('DisplayTypeRef')
