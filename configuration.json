@@ -20,5 +20,15 @@
       "type": "password",
       "required": false
     }
+  },
+  {
+    "key": "RenameResources",
+    "type": "checkbox",
+    "defaultValue": false,
+    "templateOptions": {
+      "label": "Rename resources",
+      "description": "When toggled, functions and departments will be renamed",
+      "required": false
+    }
   }
 ]

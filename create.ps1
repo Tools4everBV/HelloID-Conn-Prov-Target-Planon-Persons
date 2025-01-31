@@ -101,17 +101,26 @@ try {
                 "`$DepartmentRef"     = $actionContext.Data.DepartmentRef
                 "`$EmploymenttypeRef" = $actionContext.Data.EmploymenttypeRef
                 "`$DisplayTypeRef"    = $actionContext.Data.DisplayTypeRef
+                "`$FreeString41"      = $actionContext.Data.FreeString41
+                "`$PersonPositionRef" = $actionContext.Data.PersonPositionRef
             } -Force
+
+            if([String]::IsNullOrEmpty($actionContext.Data.FreeString41))
+            {
+                $actionContext.Data.PSObject.Properties.Remove("`$FreeString41")
+            }
+            if([String]::IsNullOrEmpty($actionContext.Data.PersonPositionRef))
+            {
+                $actionContext.Data.PSObject.Properties.Remove("`$PersonPositionRef")
+            }
 
             $actionContext.Data.PSObject.Properties.Remove('DepartmentRef')
             $actionContext.Data.PSObject.Properties.Remove('EmploymenttypeRef')
             $actionContext.Data.PSObject.Properties.Remove('DisplayTypeRef')
+            $actionContext.Data.PSObject.Properties.Remove('FreeString41')
+            $actionContext.Data.PSObject.Properties.Remove('PersonPositionRef')
 
-            # Set Start and End Date when creating a user
-            $actionContext.Data | Add-Member @{
-                "BeginDate" = (Get-Date).ToString("yyyy-MM-dd")
-                "EndDate"   = (Get-Date).AddDays(-1).ToString("yyyy-MM-dd")
-            } -Force
+            
 
             $splatCreateParams = @{
                 Uri     = "$($actionContext.Configuration.BaseUrl)/sdk/system/rest/v1/execute/HelloIDAPI/BomAdd"
