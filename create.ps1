@@ -23,7 +23,8 @@ function Resolve-Planon-PersonsError {
         }
         if (-not [string]::IsNullOrEmpty($ErrorObject.ErrorDetails.Message)) {
             $httpErrorObj.ErrorDetails = $ErrorObject.ErrorDetails.Message
-        } elseif ($ErrorObject.Exception.GetType().FullName -eq 'System.Net.WebException') {
+        }
+        elseif ($ErrorObject.Exception.GetType().FullName -eq 'System.Net.WebException') {
             if ($null -ne $ErrorObject.Exception.Response) {
                 $streamReaderResponse = [System.IO.StreamReader]::new($ErrorObject.Exception.Response.GetResponseStream()).ReadToEnd()
                 if (-not [string]::IsNullOrEmpty($streamReaderResponse)) {
@@ -34,7 +35,8 @@ function Resolve-Planon-PersonsError {
         try {
             $errorDetailsObject = ($httpErrorObj.ErrorDetails | ConvertFrom-Json)
             $httpErrorObj.FriendlyMessage = $errorDetailsObject.errors.description
-        } catch {
+        }
+        catch {
             $httpErrorObj.FriendlyMessage = $httpErrorObj.ErrorDetails
         }
         Write-Output $httpErrorObj
@@ -46,11 +48,23 @@ try {
     # Initial Assignments
     $outputContext.AccountReference = 'Currently not available'
 
-    $headers = @{
-        'Accept'       = 'application/json'
-        'Content-Type' = 'application/json'
-        Authorization  = "PLANONKEY accesskey=$($actionContext.Configuration.AuthToken)"
+    # Requesting authorization token
+    $splatRetrieveTokenParams = @{
+        Uri         = "$($actionContext.Configuration.BaseUrl)/auth/realms/planon/protocol/openid-connect/token"
+        Method      = 'POST'
+        ContentType = 'application/x-www-form-urlencoded'
+        Body        = @{
+            client_id     = $($actionContext.Configuration.ClientId)
+            client_secret = $($actionContext.Configuration.ClientSecret)
+            grant_type    = "client_credentials"
+        }
     }
+    $responseToken = Invoke-RestMethod @splatRetrieveTokenParams
+
+    #create headers
+    $headers = [System.Collections.Generic.Dictionary[string, string]]::new()
+    $headers.Add('Authorization', "Bearer $($responseToken.access_token)")
+
 
     # Validate correlation configuration
     if ($actionContext.CorrelationConfiguration.Enabled) {
@@ -73,21 +87,26 @@ try {
         }
 
         $splatGetUserParams = @{
-            Uri     = "$($actionContext.Configuration.BaseUrl)/sdk/system/rest/v1/read/HelloIDAPI"
-            Method  = 'POST'
-            Body    = ($getUserBody | ConvertTo-Json -Depth 10)
-            Headers = $headers
+            Uri         = "$($actionContext.Configuration.BaseUrl)/sdk/system/rest/v1/read/HelloIDAPI"
+            Method      = 'POST'
+            Body        = ($getUserBody | ConvertTo-Json -Depth 10)
+            Headers     = $headers
+            ContentType = 'application/json'
         }
 
         # Determine if a user needs to be [created] or [correlated]
-        $correlatedAccount = (Invoke-RestMethod @splatGetUserParams).records
+        $response = Invoke-RestMethod @splatGetUserParams
+        Write-Verbose "Correlation response: $($response | ConvertTo-Json -Depth 10)"
+        $correlatedAccount = $response.records
     }
 
     if ($correlatedAccount.count -eq 1) {
         $action = 'CorrelateAccount'
-    } elseif ($correlatedAccount.Count -gt 1) {
+    }
+    elseif ($correlatedAccount.Count -gt 1) {
         throw "Multiple Accounts [$($correlatedAccount.Count)] found with Correlation Value [$correlationField : $correlationValue]"
-    } else {
+    }
+    else {
         $action = 'CreateAccount'
     }
 
@@ -105,12 +124,10 @@ try {
                 "`$PersonPositionRef" = $actionContext.Data.PersonPositionRef
             } -Force
 
-            if([String]::IsNullOrEmpty($actionContext.Data.FreeString41))
-            {
+            if ([String]::IsNullOrEmpty($actionContext.Data.FreeString41)) {
                 $actionContext.Data.PSObject.Properties.Remove("`$FreeString41")
             }
-            if([String]::IsNullOrEmpty($actionContext.Data.PersonPositionRef))
-            {
+            if ([String]::IsNullOrEmpty($actionContext.Data.PersonPositionRef)) {
                 $actionContext.Data.PSObject.Properties.Remove("`$PersonPositionRef")
             }
 
@@ -120,7 +137,6 @@ try {
             $actionContext.Data.PSObject.Properties.Remove('FreeString41')
             $actionContext.Data.PSObject.Properties.Remove('PersonPositionRef')
 
-            
 
             $splatCreateParams = @{
                 Uri     = "$($actionContext.Configuration.BaseUrl)/sdk/system/rest/v1/execute/HelloIDAPI/BomAdd"
@@ -137,7 +153,8 @@ try {
                 $createdAccount = (Invoke-RestMethod @splatCreateParams).records
                 $outputContext.Data = $createdAccount
                 $outputContext.AccountReference = $createdAccount.Code
-            } else {
+            }
+            else {
                 Write-Information '[DryRun] Create and correlate Planon-Persons account, will be executed during enforcement'
             }
             $auditLogMessage = "Create account was successful. AccountReference is: [$($outputContext.AccountReference)]"
@@ -161,7 +178,8 @@ try {
             Message = $auditLogMessage
             IsError = $false
         })
-} catch {
+}
+catch {
     $outputContext.success = $false
     $ex = $PSItem
     if ($($ex.Exception.GetType().FullName -eq 'Microsoft.PowerShell.Commands.HttpResponseException') -or
@@ -169,7 +187,8 @@ try {
         $errorObj = Resolve-Planon-PersonsError -ErrorObject $ex
         $auditMessage = "Could not create or correlate Planon-Persons account. Error: $($errorObj.FriendlyMessage)"
         Write-Warning "Error at Line '$($errorObj.ScriptLineNumber)': $($errorObj.Line). Error: $($errorObj.ErrorDetails)"
-    } else {
+    }
+    else {
         $auditMessage = "Could not create or correlate Planon-Persons account. Error: $($ex.Exception.Message)"
         Write-Warning "Error at Line '$($ex.InvocationInfo.ScriptLineNumber)': $($ex.InvocationInfo.Line). Error: $($ex.Exception.Message)"
     }
