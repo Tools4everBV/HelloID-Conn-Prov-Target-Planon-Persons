@@ -43,8 +43,10 @@ The following settings are required to connect to the API.
 
 | Setting           | Description                                       | Mandatory |
 | ----------------- | ------------------------------------------------- | --------- |
-| AuthToken         | The AuthToken to connect to the API               | Yes       |
+| AuthUrl         | The URL to the API for requesting token              | Yes       |
 | BaseUrl           | The URL to the API                                | Yes       |
+| ClientID           | ClientID to connect to the API                                | Yes       |
+| ClientSecret           | ClientSecret to connect to the API                                | Yes       |
 | RenameResources   | When enabled, rename departments and functions    | Yes       |
 
 
@@ -78,7 +80,7 @@ The following lifecycle actions are available:
 
 ### Field mapping
 
-The field mapping can be imported by using the _fieldMapping.json_ file.
+The field mapping can be imported by using the _fieldMapping.json_ file. Please be aware of the fact that the default fieldmapping will not meet your requirements delivered by Planon. This is custom work at the Planon site. 
 
 ## Remarks
 
@@ -96,9 +98,9 @@ The function resource script requires two value's a name and externalid. For exa
 
 
 ### Fieldmapping
-There are 3 properties (DepartmentRef, EmploymenttypeRef and DisplayTypeRef) that need to have a dollar sign in front of them when creating or updating a person. However this is not possible in the fieldmapping, therefore the create and update scripts replace these properties in the actioncontext.data or correlatedAccount respectively.
+There are 3 properties (DepartmentRef, RefBOStateUserDefined and CostCentreRef) that need to have a dollar sign in front of them when creating or updating a person. However this is not possible in the fieldmapping, therefore the create and update scripts replace these properties in the actioncontext.data or correlatedAccount respectively.
 
-The property FreeString41 gets populated with the reference of the manager in the create and update scripts.
+The property FreeString41 gets populated with the reference of the manager in the create and update scripts. This is an optional option. Pleas enable this code on line 118 if neccecary.
 
 ### Get user call
 

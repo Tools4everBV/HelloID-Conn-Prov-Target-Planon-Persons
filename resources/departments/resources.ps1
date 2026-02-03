@@ -43,12 +43,24 @@ function Resolve-Planon-PersonsError {
 #endregion
 
 try {
-    Write-Information 'Setting authorization header'
-    $headers = @{
-        'Accept'       = 'application/json'
-        'Content-Type' = 'application/json'
-        Authorization  = "PLANONKEY accesskey=$($actionContext.Configuration.AuthToken)"
+    # Requesti
+    ng authorization token
+    $splatRetrieveTokenParams = @{
+        Uri         = "$($actionContext.Configuration.AuthURL)/auth/realms/planon/protocol/openid-connect/token"
+        Method      = 'POST'
+        ContentType = 'application/x-www-form-urlencoded'
+        Body        = @{
+            client_id     = $($actionContext.Configuration.ClientId)
+            client_secret = $($actionContext.Configuration.ClientSecret)
+            grant_type    = "client_credentials"
+        }
     }
+    $responseToken = Invoke-RestMethod @splatRetrieveTokenParams
+
+    #create headers
+    $headers = [System.Collections.Generic.Dictionary[string, string]]::new()
+    $headers.Add('Authorization', "Bearer $($responseToken.access_token)")
+    $headers.Add("Content-Type", "application/json")
 
     Write-Information 'Retrieving all organizational units from Planon'
     $splatGetOrgUnitsParams = @{

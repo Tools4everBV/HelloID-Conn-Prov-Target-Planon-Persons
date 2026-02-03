@@ -50,7 +50,7 @@ try {
 
     # Requesting authorization token
     $splatRetrieveTokenParams = @{
-        Uri         = "$($actionContext.Configuration.BaseUrl)/auth/realms/planon/protocol/openid-connect/token"
+        Uri         = "$($actionContext.Configuration.AuthURL)/auth/realms/planon/protocol/openid-connect/token"
         Method      = 'POST'
         ContentType = 'application/x-www-form-urlencoded'
         Body        = @{
@@ -64,12 +64,12 @@ try {
     #create headers
     $headers = [System.Collections.Generic.Dictionary[string, string]]::new()
     $headers.Add('Authorization', "Bearer $($responseToken.access_token)")
-
+    $headers.Add("Content-Type", "application/json")
 
     # Validate correlation configuration
     if ($actionContext.CorrelationConfiguration.Enabled) {
         $correlationField = $actionContext.CorrelationConfiguration.AccountField
-        $correlationValue = $actionContext.CorrelationConfiguration.PersonFieldValue
+        $correlationValue = $actionContext.CorrelationConfiguration.AccountFieldValue
 
         if ([string]::IsNullOrEmpty($($correlationField))) {
             throw 'Correlation is enabled but not configured correctly'
@@ -87,12 +87,13 @@ try {
         }
 
         $splatGetUserParams = @{
-            Uri         = "$($actionContext.Configuration.BaseUrl)/sdk/system/rest/v1/read/HelloIDAPI"
+            Uri         = "$($actionContext.Configuration.BaseUrl)/sdk/system/rest/v2/read/HelloIDAPI"
             Method      = 'POST'
             Body        = ($getUserBody | ConvertTo-Json -Depth 10)
             Headers     = $headers
             ContentType = 'application/json'
         }
+
 
         # Determine if a user needs to be [created] or [correlated]
         $response = Invoke-RestMethod @splatGetUserParams
@@ -113,15 +114,16 @@ try {
     # Process
     switch ($action) {
         'CreateAccount' {
-            $actionContext.Data.FreeString41 = $actionContext.References.ManagerAccount
+            #Manager assignment workaround
+            #$actionContext.Data.FreeString41 = $actionContext.References.ManagerAccount
 
-            # Rename properties to include "$" as property name prefix because of API specifications
+            # Rename properties to include "$" as property name prefix because of API specifications 
             $actionContext.Data | Add-Member @{
+                "`$CostCentreRef"     = $actionContext.Data.CostCentreRef
                 "`$DepartmentRef"     = $actionContext.Data.DepartmentRef
-                "`$EmploymenttypeRef" = $actionContext.Data.EmploymenttypeRef
-                "`$DisplayTypeRef"    = $actionContext.Data.DisplayTypeRef
                 "`$FreeString41"      = $actionContext.Data.FreeString41
                 "`$PersonPositionRef" = $actionContext.Data.PersonPositionRef
+                "`$RefBOStateUserDefined" = $actionContext.Data.RefBOStateUserDefined
             } -Force
 
             if ([String]::IsNullOrEmpty($actionContext.Data.FreeString41)) {
@@ -132,10 +134,10 @@ try {
             }
 
             $actionContext.Data.PSObject.Properties.Remove('DepartmentRef')
-            $actionContext.Data.PSObject.Properties.Remove('EmploymenttypeRef')
-            $actionContext.Data.PSObject.Properties.Remove('DisplayTypeRef')
             $actionContext.Data.PSObject.Properties.Remove('FreeString41')
             $actionContext.Data.PSObject.Properties.Remove('PersonPositionRef')
+            $actionContext.Data.PSObject.Properties.Remove('CostCentreRef')
+            $actionContext.Data.PSObject.Properties.Remove('RefBOStateUserDefined')
 
 
             $splatCreateParams = @{
