@@ -72,8 +72,8 @@ The following features are available:
 | **Account Lifecycle**                     | ✅         | Create, Update, Enable, Disable | There is no Delete action, the disable acts as a soft delete |
 | **Permissions**                           | ❌         | Retrieve, Grant, Revoke         | Static or Dynamic                                            |
 | **Resources**                             | ✅         | Create departments and functions                               |                                                              |
-| **Entitlement Import: Accounts**          | ✅         | -                               |                                                              |
-| **Entitlement Import: Permissions**       | ✅         | -                               |                                                              |
+| **Entitlement Import: Accounts**          | ❌         | -                               |                                                              |
+| **Entitlement Import: Permissions**       | ❌         | -                               |                                                              |
 | **Governance Reconciliation Resolutions** | ❌        | -                               |                                                              |
 
 ### Fieldmapping

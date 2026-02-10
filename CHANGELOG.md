@@ -8,7 +8,7 @@ All notable changes to this project will be documented in this file. The format 
 - Added resources based on CostCenter
 - Added importscript
 - Added Enable and Disable
-- Updated readme.
+- Updated readme
 
 ## [1.1.0] - 10-12-2024
 
