@@ -1,5 +1,5 @@
 #################################################
-# HelloID-Conn-Prov-Target-Planon-Persons-Update
+# HelloID-Conn-Prov-Target-Planon-Persons-Enable
 # PowerShell V2
 #################################################
 
@@ -84,76 +84,94 @@ try {
         Headers = $headers
     }
 
-    # Determine if a user needs to be [created] or [correlated]
+    # If the account exists, it will be enabled. If the account does not exist, it will be logged in the audit log that it could not be found, possibly indicating that it could be deleted
     $correlatedAccount = ((Invoke-RestMethod @splatGetUserParams).records | Select-Object -First 1)
     $outputContext.PreviousData = $correlatedAccount
 
-    # Rename properties to include "$" as property name prefix because of API specifications
-    # Rename properties for correlatedAccount
-    $correlatedAccount | Add-Member @{
-        "`$RefBOStateUserDefined" = $actionContext.Data.RefBOStateUserDefined
-    } -Force
+    if ($null -ne $correlatedAccount) {
+        $action = 'EnableAccount'
+    }
+    else {
+        $action = 'NotFound'
+    }
 
-    $correlatedAccount.PSObject.Properties.Remove('RefBOStateUserDefined')
+    switch ($action) {
+        'EnableAccount' {
+            # Rename properties to include "$" as property name prefix because of API specifications
+            # Rename properties for correlatedAccount
+            $correlatedAccount | Add-Member @{
+                "`$RefBOStateUserDefined" = $actionContext.Data.RefBOStateUserDefined
+            } -Force
 
-    # Rename properties for actionContext.Data
-    $actionContext.Data | Add-Member @{
-        "`$RefBOStateUserDefined" = $actionContext.Data.RefBOStateUserDefined
-    } -Force
+            $correlatedAccount.PSObject.Properties.Remove('RefBOStateUserDefined')
 
-    $actionContext.Data.PSObject.Properties.Remove('RefBOStateUserDefined')
+            # Rename properties for actionContext.Data
+            $actionContext.Data | Add-Member @{
+                "`$RefBOStateUserDefined" = $actionContext.Data.RefBOStateUserDefined
+            } -Force
+
+            $actionContext.Data.PSObject.Properties.Remove('RefBOStateUserDefined')
 
 
-    # Process
-    $accountBody = @{
-        filter = @{
-            Code = @{
-                eq = $actionContext.References.Account
+            # Process
+            $accountBody = @{
+                filter = @{
+                    Code = @{
+                        eq = $actionContext.References.Account
+                    }
+                }
+                values = $actionContext.Data
             }
+
+            $splatUpdateParams = @{
+                Uri     = "$($actionContext.Configuration.BaseUrl)/sdk/system/rest/v2/update/HelloIDAPI"
+                Method  = 'POST'
+                Body    = ($accountBody | ConvertTo-Json -Depth 10)
+                Headers = $headers
+            }
+
+            if (-not($actionContext.DryRun -eq $true)) {
+                Write-Information "Enable Planon account with accountReference: [$($actionContext.References.Account)]"
+                $null = Invoke-RestMethod @splatUpdateParams
+            }
+            else {
+                Write-Information "[DryRun] Enable Planon account with accountReference: [$($actionContext.References.Account)], will be executed during enforcement"
+            }
+
+            $outputContext.Success = $true
+            $outputContext.AuditLogs.Add([PSCustomObject]@{
+                    Message = "Enable account was successful"
+                    IsError = $false
+                })
+            break
         }
-        values = $actionContext.Data
-    }
 
-    $splatUpdateParams = @{
-        Uri     = "$($actionContext.Configuration.BaseUrl)/sdk/system/rest/v2/update/HelloIDAPI"
-        Method  = 'POST'
-        Body    = ($accountBody | ConvertTo-Json -Depth 10)
-        Headers = $headers
+        'NotFound' {
+            Write-Information "Planon account: [$($actionContext.References.Account)] could not be found, possibly indicating that it could be deleted"
+            $outputContext.Success = $false
+            $outputContext.AuditLogs.Add([PSCustomObject]@{
+                    Message = "Planon account: [$($actionContext.References.Account)] could not be found, possibly indicating that it could be deleted"
+                    IsError = $true
+                })
+            break
+        }   
+   
+    }}
+    catch {
+        $outputContext.Success = $false
+        $ex = $PSItem
+        if ($($ex.Exception.GetType().FullName -eq 'Microsoft.PowerShell.Commands.HttpResponseException') -or
+            $($ex.Exception.GetType().FullName -eq 'System.Net.WebException')) {
+            $errorObj = Resolve-Planon-PersonsError -ErrorObject $ex
+            $auditMessage = "Could not enable Planon account. Error: $($errorObj.FriendlyMessage)"
+            Write-Warning "Error at Line '$($errorObj.ScriptLineNumber)': $($errorObj.Line). Error: $($errorObj.ErrorDetails)"
+        }
+        else {
+            $auditMessage = "Could not enable Planon account. Error: $($ex.Exception.Message)"
+            Write-Warning "Error at Line '$($ex.InvocationInfo.ScriptLineNumber)': $($ex.InvocationInfo.Line). Error: $($ex.Exception.Message)"
+        }
+        $outputContext.AuditLogs.Add([PSCustomObject]@{
+                Message = $auditMessage
+                IsError = $true
+            })
     }
-
-    if (-not($actionContext.DryRun -eq $true)) {
-        Write-Information "Enable Planon account with accountReference: [$($actionContext.References.Account)]"
-        $null = Invoke-RestMethod @splatUpdateParams
-    }
-    else {
-        Write-Information "[DryRun] Enable Planon account with accountReference: [$($actionContext.References.Account)], will be executed during enforcement"
-    }
-
-    $outputContext.Success = $true
-    $outputContext.AuditLogs.Add([PSCustomObject]@{
-            Message = "Enable account was successful, Account property(s) updated: [$($actionContext.Data -join ',')]"
-            IsError = $false
-        })
-    break
-
-
-    $outputContext.Data = $actionContext.Data
-}
-catch {
-    $outputContext.Success = $false
-    $ex = $PSItem
-    if ($($ex.Exception.GetType().FullName -eq 'Microsoft.PowerShell.Commands.HttpResponseException') -or
-        $($ex.Exception.GetType().FullName -eq 'System.Net.WebException')) {
-        $errorObj = Resolve-Planon-PersonsError -ErrorObject $ex
-        $auditMessage = "Could not enable Planon account. Error: $($errorObj.FriendlyMessage)"
-        Write-Warning "Error at Line '$($errorObj.ScriptLineNumber)': $($errorObj.Line). Error: $($errorObj.ErrorDetails)"
-    }
-    else {
-        $auditMessage = "Could not enable Planon account. Error: $($ex.Exception.Message)"
-        Write-Warning "Error at Line '$($ex.InvocationInfo.ScriptLineNumber)': $($ex.InvocationInfo.Line). Error: $($ex.Exception.Message)"
-    }
-    $outputContext.AuditLogs.Add([PSCustomObject]@{
-            Message = $auditMessage
-            IsError = $true
-        })
-}

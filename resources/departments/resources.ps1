@@ -43,8 +43,7 @@ function Resolve-Planon-PersonsError {
 #endregion
 
 try {
-    # Requesti
-    ng authorization token
+    # Requesting authorization token
     $splatRetrieveTokenParams = @{
         Uri         = "$($actionContext.Configuration.AuthURL)/auth/realms/planon/protocol/openid-connect/token"
         Method      = 'POST'
@@ -64,7 +63,7 @@ try {
 
     Write-Information 'Retrieving all organizational units from Planon'
     $splatGetOrgUnitsParams = @{
-        Uri     = "$($actionContext.Configuration.BaseUrl)/sdk/system/rest/v1/read/HelloIDAPIEenheden"
+        Uri     = "$($actionContext.Configuration.BaseUrl)/sdk/system/rest/v2/read/HelloIDAPIEenheden"
         Method  = 'POST'
         Body    = @{} | ConvertTo-Json
         Headers = $headers
@@ -96,7 +95,7 @@ try {
         try {
             if (-not ($actionContext.DryRun -eq $True)) {
                 $splatCreateResourceParams = @{
-                    Uri     = "$($actionContext.Configuration.BaseUrl)/sdk/system/rest/v1/execute/HelloIDAPIEenheden/BomAdd"
+                    Uri     = "$($actionContext.Configuration.BaseUrl)/sdk/system/rest/v2/execute/HelloIDAPIEenheden/BomAdd"
                     Method  = 'POST'
                     Body    = @{
                         values = @{

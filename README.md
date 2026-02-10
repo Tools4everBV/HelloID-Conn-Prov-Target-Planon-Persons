@@ -1,10 +1,6 @@
 # HelloID-Conn-Prov-Target-Planon-Persons
 | :warning: Warning |
 |:---------------------------|
-| This connector is currently "Work in Porgress", please do not use this connector without contacting Tools4ever. 
-
-| :warning: Warning |
-|:---------------------------|
 Planon uses an API which needs to be configured for each customer by a Planon consultant. Therefore this connector will **not work** out of the box without assistance from a Planon consultant and HelloID consultant.
 
 > [!IMPORTANT]
@@ -67,24 +63,26 @@ The correlation configuration is used to specify which properties will be used t
 > [!TIP]
 > _For more information on correlation, please refer to our correlation [documentation](https://docs.helloid.com/en/provisioning/target-systems/powershell-v2-target-systems/correlation.html) pages_.
 
-### Available lifecycle actions
+## Supported  features
 
-The following lifecycle actions are available:
+The following features are available:
 
-| Action                                  | Description                                                                                 |
-| --------------------------------------- | ------------------------------------------------------------------------------------------- |
-| create.ps1                              | Creates a new account.                                                                      |
-| disable.ps1                             | Disables an account, preventing access without permanent removal.                           |
-| enable.ps1                              | Enables an account, granting access.                                                       |
-| update.ps1                              | Updates the attributes of an account.                                                      |
-| resources/departments/resources.ps1     | Manages resources, such as creating departments.                                                |
-| resources/functions/resources.ps1       | Manages resources, such as creating functions.                                                |
-| configuration.json                      | Contains the connection settings and general configuration for the connector.              |
-| fieldMapping.json                       | Defines mappings between person fields and target system person account fields.              |
+| Feature                                   | Supported | Actions                         | Remarks                                                      |
+| ----------------------------------------- | --------- | ------------------------------- | ------------------------------------------------------------ |
+| **Account Lifecycle**                     | ✅         | Create, Update, Enable, Disable | There is no Delete action, the disable acts as a soft delete |
+| **Permissions**                           | ❌         | Retrieve, Grant, Revoke         | Static or Dynamic                                            |
+| **Resources**                             | ✅         | Create departments and functions                               |                                                              |
+| **Entitlement Import: Accounts**          | ✅         | -                               |                                                              |
+| **Entitlement Import: Permissions**       | ✅         | -                               |                                                              |
+| **Governance Reconciliation Resolutions** | ❌        | -                               |                                                              |
 
-### Field mapping
+### Fieldmapping
 
 The field mapping can be imported by using the _fieldMapping.json_ file. Please be aware of the fact that the default fieldmapping will not meet your requirements delivered by Planon. This is custom work at the Planon site. 
+
+There are 3 properties (DepartmentRef, RefBOStateUserDefined and CostCentreRef) that need to have a dollar sign in front of them when creating or updating a person. However this is not possible in the fieldmapping, therefore the create and update scripts replace these properties in the actioncontext.data or correlatedAccount respectively.
+
+The property FreeString41 gets populated with the reference of the manager in the create and update scripts. This is an optional option. Pleas enable this code on line 118 if neccecary.
 
 ## Remarks
 
@@ -98,13 +96,6 @@ In these resource scripts, there is a GET call used to retrieve the functions an
 The department resource script requires two value's a displayname and externalid. For example _Department_.
 
 The function resource script requires two value's a name and externalid. For example _Title_.
-
-
-
-### Fieldmapping
-There are 3 properties (DepartmentRef, RefBOStateUserDefined and CostCentreRef) that need to have a dollar sign in front of them when creating or updating a person. However this is not possible in the fieldmapping, therefore the create and update scripts replace these properties in the actioncontext.data or correlatedAccount respectively.
-
-The property FreeString41 gets populated with the reference of the manager in the create and update scripts. This is an optional option. Pleas enable this code on line 118 if neccecary.
 
 ### Get user call
 
