@@ -65,6 +65,7 @@ try {
     $headers = [System.Collections.Generic.Dictionary[string, string]]::new()
     $headers.Add('Authorization', "Bearer $($responseToken.access_token)")
     $headers.Add("Content-Type", "application/json")
+    $headers.Add("ArchiveMode", "all")
 
     # Validate correlation configuration
     if ($actionContext.CorrelationConfiguration.Enabled) {
@@ -96,9 +97,21 @@ try {
 
 
         # Determine if a user needs to be [created] or [correlated]
-        $response = Invoke-RestMethod @splatGetUserParams
-        Write-Verbose "Correlation response: $($response | ConvertTo-Json -Depth 10)"
-        $correlatedAccount = $response.records
+        $correlatedAccount = (Invoke-RestMethod @splatGetUserParams).records  
+    }
+
+    #DeArchive person from Archived persons
+    if($correlatedAccount.IsArchived -eq $true){
+        
+        $splatUnArchiveUserParams = @{
+            Uri         = "$($actionContext.Configuration.BaseUrl)/sdk/system/rest/v2/execute/HelloIDAPI/BomDeArchive"
+            Method      = 'POST'
+            Body        = ($getUserBody | ConvertTo-Json -Depth 10)
+            Headers     = $headers
+            ContentType = 'application/json'
+        }
+
+        $dearchive = Invoke-RestMethod @splatUnArchiveUserParams
     }
 
     if ($correlatedAccount.count -eq 1) {

@@ -82,9 +82,9 @@ try {
         Headers = $headers
     }
 
-    # Determine if a user needs to be [created] or [correlated]
     $importedAccounts = ((Invoke-RestMethod @splatGetUserParams).records)
-
+    $today = Get-Date
+    
     foreach ($importedAccount in $importedAccounts) {
         # Making sure only fieldMapping fields are imported
         $data = @{}
@@ -93,7 +93,6 @@ try {
         }
 
         # Set Enabled based on importedAccount status"
-        $today = Get-Date
         $isEnabled = $false
         if ($importedAccount.EndDate -eq $null -Or $importedAccount.EndDate -lt $today) {
             $isEnabled = $true

@@ -76,6 +76,8 @@ try {
 
     $resourcesToCreate = [System.Collections.Generic.List[object]]::new()
     $resourcesToRename = [System.Collections.Generic.List[object]]::new()
+
+    if($actionContext.Configuration.RenameResources -eq $true){
     foreach ($resource in $resourceData) {
         if(-not([string]::IsNullOrEmpty($resource.ExternalId))){
             $exists = $organizationalUnitsGrouped["$($resource.ExternalId)"]
@@ -89,12 +91,10 @@ try {
             }
         }
     }
+}
 
     Write-Information "Creating [$($resourcesToCreate.Count)] resources"
     foreach ($resource in $resourcesToCreate) {
-
-Write-Information $resource
-exit
 
         try {
             if (-not ($actionContext.DryRun -eq $True)) {

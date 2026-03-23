@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com), and this project adheres to [Semantic Versioning](https://semver.org).
 
+## [1.2.1] - 23-03-2026
+
+- Added unarchiving when a Person is archived and needs to be created again
+
 ## [1.2.0] - 10-02-2026
 
 - Changed authentication method.

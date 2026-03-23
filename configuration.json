@@ -5,7 +5,7 @@
     "templateOptions": {
       "description": "The baseUrl to connect to the API",
       "label": "BaseUrl",
-      "placeholder": "Please enter some text",
+      "placeholder": "",
       "required": true
     },
     "type": "input"
@@ -16,7 +16,7 @@
     "templateOptions": {
       "description": "The authentication to the API",
       "label": "AuthenticationURL",
-      "placeholder": "Please enter some text",
+      "placeholder": "",
       "required": true
     },
     "type": "input"

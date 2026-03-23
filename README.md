@@ -1,6 +1,6 @@
 # HelloID-Conn-Prov-Target-Planon-Persons
 | :warning: Warning |
-|:---------------------------|
+| :---------------- |
 Planon uses an API which needs to be configured for each customer by a Planon consultant. Therefore this connector will **not work** out of the box without assistance from a Planon consultant and HelloID consultant.
 
 > [!IMPORTANT]
@@ -12,19 +12,20 @@ Planon uses an API which needs to be configured for each customer by a Planon co
 
 ## Table of contents
 
-- [HelloID-Conn-Prov-Target-Planon-Persons](#helloid-conn-prov-target-connectorname)
+- [HelloID-Conn-Prov-Target-Planon-Persons](#helloid-conn-prov-target-planon-persons)
   - [Table of contents](#table-of-contents)
   - [Introduction](#introduction)
   - [Getting started](#getting-started)
     - [Prerequisites](#prerequisites)
     - [Connection settings](#connection-settings)
     - [Correlation configuration](#correlation-configuration)
-    - [Available lifecycle actions](#available-lifecycle-actions)
-    - [Field mapping](#field-mapping)
+  - [Supported  features](#supported--features)
+    - [Fieldmapping](#fieldmapping)
   - [Remarks](#remarks)
+    - [Resource scrips](#resource-scrips)
+    - [Get user call](#get-user-call)
   - [Development resources](#development-resources)
     - [API endpoints](#api-endpoints)
-    - [API documentation](#api-documentation)
   - [Getting help](#getting-help)
   - [HelloID docs](#helloid-docs)
 
@@ -41,13 +42,13 @@ _HelloID-Conn-Prov-Target-Planon-Persons_ is a _target_ connector. _Planon-Perso
 
 The following settings are required to connect to the API.
 
-| Setting           | Description                                       | Mandatory |
-| ----------------- | ------------------------------------------------- | --------- |
-| AuthUrl         | The URL to the API for requesting token              | Yes       |
-| BaseUrl           | The URL to the API                                | Yes       |
-| ClientID           | ClientID to connect to the API                                | Yes       |
-| ClientSecret           | ClientSecret to connect to the API                                | Yes       |
-| RenameResources   | When enabled, rename departments and functions    | Yes       |
+| Setting         | Description                                    | Mandatory |
+| --------------- | ---------------------------------------------- | --------- |
+| AuthUrl         | The URL to the API for requesting token        | Yes       |
+| BaseUrl         | The URL to the API                             | Yes       |
+| ClientID        | ClientID to connect to the API                 | Yes       |
+| ClientSecret    | ClientSecret to connect to the API             | Yes       |
+| RenameResources | When enabled, rename departments and functions | Yes       |
 
 
 ### Correlation configuration
@@ -67,14 +68,14 @@ The correlation configuration is used to specify which properties will be used t
 
 The following features are available:
 
-| Feature                                   | Supported | Actions                         | Remarks                                                      |
-| ----------------------------------------- | --------- | ------------------------------- | ------------------------------------------------------------ |
-| **Account Lifecycle**                     | ✅         | Create, Update, Enable, Disable | There is no Delete action, the disable acts as a soft delete |
-| **Permissions**                           | ❌         | Retrieve, Grant, Revoke         | Static or Dynamic                                            |
-| **Resources**                             | ✅         | Create departments and functions                               |                                                              |
-| **Entitlement Import: Accounts**          | ❌         | -                               |                                                              |
-| **Entitlement Import: Permissions**       | ❌         | -                               |                                                              |
-| **Governance Reconciliation Resolutions** | ❌        | -                               |                                                              |
+| Feature                                   | Supported | Actions                          | Remarks                                                      |
+| ----------------------------------------- | --------- | -------------------------------- | ------------------------------------------------------------ |
+| **Account Lifecycle**                     | ✅         | Create, Update, Enable, Disable  | There is no Delete action, the disable acts as a soft delete |
+| **Permissions**                           | ❌         | Retrieve, Grant, Revoke          | Static or Dynamic                                            |
+| **Resources**                             | ✅         | Create departments and functions |                                                              |
+| **Entitlement Import: Accounts**          | ✅         | Import Account details           |                                                              |
+| **Entitlement Import: Permissions**       | ❌         | -                                |                                                              |
+| **Governance Reconciliation Resolutions** | ❌         | -                                |                                                              |
 
 ### Fieldmapping
 

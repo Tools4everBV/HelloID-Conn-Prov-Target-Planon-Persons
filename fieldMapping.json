@@ -207,7 +207,7 @@
     },
     {
       "Name": "RefBOStateUserDefined",
-      "Description": "Use EMPL10 for active or EMPL20 for inactive",
+      "Description": "Mendatory: Use EMPL10 for active or EMPL20 for inactive",
       "Type": "Text",
       "MappingActions": [
         {
