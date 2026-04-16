@@ -23,7 +23,8 @@ function Resolve-Planon-PersonsError {
         }
         if (-not [string]::IsNullOrEmpty($ErrorObject.ErrorDetails.Message)) {
             $httpErrorObj.ErrorDetails = $ErrorObject.ErrorDetails.Message
-        } elseif ($ErrorObject.Exception.GetType().FullName -eq 'System.Net.WebException') {
+        }
+        elseif ($ErrorObject.Exception.GetType().FullName -eq 'System.Net.WebException') {
             if ($null -ne $ErrorObject.Exception.Response) {
                 $streamReaderResponse = [System.IO.StreamReader]::new($ErrorObject.Exception.Response.GetResponseStream()).ReadToEnd()
                 if (-not [string]::IsNullOrEmpty($streamReaderResponse)) {
@@ -34,7 +35,8 @@ function Resolve-Planon-PersonsError {
         try {
             $errorDetailsObject = ($httpErrorObj.ErrorDetails | ConvertFrom-Json)
             $httpErrorObj.FriendlyMessage = $errorDetailsObject.errors.description
-        } catch {
+        }
+        catch {
             $httpErrorObj.FriendlyMessage = $httpErrorObj.ErrorDetails
         }
         Write-Output $httpErrorObj
@@ -48,11 +50,23 @@ try {
         throw 'The account reference could not be found'
     }
 
-    $headers = @{
-        'Accept'       = 'application/json'
-        'Content-Type' = 'application/json'
-        Authorization  = "PLANONKEY accesskey=$($actionContext.Configuration.AuthToken)"
+    # Requesting authorization token
+    $splatRetrieveTokenParams = @{
+        Uri         = "$($actionContext.Configuration.AuthURL)/auth/realms/planon/protocol/openid-connect/token"
+        Method      = 'POST'
+        ContentType = 'application/x-www-form-urlencoded'
+        Body        = @{
+            client_id     = $($actionContext.Configuration.ClientId)
+            client_secret = $($actionContext.Configuration.ClientSecret)
+            grant_type    = "client_credentials"
+        }
     }
+    $responseToken = Invoke-RestMethod @splatRetrieveTokenParams
+
+    #create headers
+    $headers = [System.Collections.Generic.Dictionary[string, string]]::new()
+    $headers.Add('Authorization', "Bearer $($responseToken.access_token)")
+    $headers.Add("Content-Type", "application/json")
 
     $getUserBody = @{
         filter = @{
@@ -74,47 +88,46 @@ try {
     $correlatedAccount = ((Invoke-RestMethod @splatGetUserParams).records | Select-Object -First 1)
     $outputContext.PreviousData = $correlatedAccount
 
-    $actionContext.Data.FreeString41 = $actionContext.References.ManagerAccount
+    # Set ManagerAccount to FreeString41 property
+    #$actionContext.Data.FreeString41 = $actionContext.References.ManagerAccount
 
     # Rename properties to include "$" as property name prefix because of API specifications
     # Rename properties for correlatedAccount
     $correlatedAccount | Add-Member @{
-        "`$DepartmentRef"     = $correlatedAccount.DepartmentRef
-        "`$EmploymenttypeRef" = $correlatedAccount.EmploymenttypeRef
-        "`$DisplayTypeRef"    = $correlatedAccount.DisplayTypeRef
-        "`$FreeString41"      = $correlatedAccount.FreeString41
-        "`$PersonPositionRef" = $correlatedAccount.PersonPositionRef
+        "`$CostCentreRef"         = $actionContext.Data.CostCentreRef
+        "`$DepartmentRef"         = $actionContext.Data.DepartmentRef
+        "`$FreeString41"          = $actionContext.Data.FreeString41
+        "`$PersonPositionRef"     = $actionContext.Data.PersonPositionRef
+        "`$RefBOStateUserDefined" = $actionContext.Data.RefBOStateUserDefined
     } -Force
 
+    $correlatedAccount.PSObject.Properties.Remove('CostCentreRef')
     $correlatedAccount.PSObject.Properties.Remove('DepartmentRef')
-    $correlatedAccount.PSObject.Properties.Remove('EmploymenttypeRef')
-    $correlatedAccount.PSObject.Properties.Remove('DisplayTypeRef')
     $correlatedAccount.PSObject.Properties.Remove('FreeString41')
     $correlatedAccount.PSObject.Properties.Remove('PersonPositionRef')
+    $correlatedAccount.PSObject.Properties.Remove('RefBOStateUserDefined')
 
     # Rename properties for actionContext.Data
     $actionContext.Data | Add-Member @{
-        "`$DepartmentRef"     = $actionContext.Data.DepartmentRef
-        "`$EmploymenttypeRef" = $actionContext.Data.EmploymenttypeRef
-        "`$DisplayTypeRef"    = $actionContext.Data.DisplayTypeRef
-        "`$FreeString41"      = $actionContext.Data.FreeString41
-        "`$PersonPositionRef" = $actionContext.Data.PersonPositionRef
+        "`$CostCentreRef"         = $actionContext.Data.CostCentreRef
+        "`$DepartmentRef"         = $actionContext.Data.DepartmentRef
+        "`$FreeString41"          = $actionContext.Data.FreeString41
+        "`$PersonPositionRef"     = $actionContext.Data.PersonPositionRef
+        "`$RefBOStateUserDefined" = $actionContext.Data.RefBOStateUserDefined
     } -Force
 
-    if([String]::IsNullOrEmpty($actionContext.Data.FreeString41))
-    {
+    if ([String]::IsNullOrEmpty($actionContext.Data.FreeString41)) {
         $actionContext.Data.PSObject.Properties.Remove("`$FreeString41")
     }
-    if([String]::IsNullOrEmpty($actionContext.Data.PersonPositionRef))
-    {
+    if ([String]::IsNullOrEmpty($actionContext.Data.PersonPositionRef)) {
         $actionContext.Data.PSObject.Properties.Remove("`$PersonPositionRef")
     }
 
     $actionContext.Data.PSObject.Properties.Remove('DepartmentRef')
-    $actionContext.Data.PSObject.Properties.Remove('EmploymenttypeRef')
-    $actionContext.Data.PSObject.Properties.Remove('DisplayTypeRef')
     $actionContext.Data.PSObject.Properties.Remove('FreeString41')
     $actionContext.Data.PSObject.Properties.Remove('PersonPositionRef')
+    $actionContext.Data.PSObject.Properties.Remove('CostCentreRef')
+    $actionContext.Data.PSObject.Properties.Remove('RefBOStateUserDefined')
 
     # Always compare the account against the current account in target system
     if ($correlatedAccount.count -eq 1) {
@@ -125,10 +138,12 @@ try {
         $propertiesChanged = Compare-Object @splatCompareProperties -PassThru | Where-Object { $_.SideIndicator -eq '=>' }
         if ($propertiesChanged) {
             $action = 'UpdateAccount'
-        } else {
+        }
+        else {
             $action = 'NoChanges'
         }
-    } else {
+    }
+    else {
         $action = 'NotFound'
     }
 
@@ -155,7 +170,7 @@ try {
             }
 
             $splatUpdateParams = @{
-                Uri     = "$($actionContext.Configuration.BaseUrl)/sdk/system/rest/v1/update/HelloIDAPI"
+                Uri     = "$($actionContext.Configuration.BaseUrl)/sdk/system/rest/v2/update/HelloIDAPI"
                 Method  = 'POST'
                 Body    = ($accountBody | ConvertTo-Json -Depth 10)
                 Headers = $headers
@@ -164,7 +179,8 @@ try {
             if (-not($actionContext.DryRun -eq $true)) {
                 Write-Information "Updating Planon-Persons account with accountReference: [$($actionContext.References.Account)]"
                 $null = Invoke-RestMethod @splatUpdateParams
-            } else {
+            }
+            else {
                 Write-Information "[DryRun] Update Planon-Persons account with accountReference: [$($actionContext.References.Account)], will be executed during enforcement"
             }
 
@@ -198,15 +214,17 @@ try {
         }
     }
     $outputContext.Data = $actionContext.Data
-} catch {
-    $outputContext.Success  = $false
+}
+catch {
+    $outputContext.Success = $false
     $ex = $PSItem
     if ($($ex.Exception.GetType().FullName -eq 'Microsoft.PowerShell.Commands.HttpResponseException') -or
         $($ex.Exception.GetType().FullName -eq 'System.Net.WebException')) {
         $errorObj = Resolve-Planon-PersonsError -ErrorObject $ex
         $auditMessage = "Could not update Planon-Persons account. Error: $($errorObj.FriendlyMessage)"
         Write-Warning "Error at Line '$($errorObj.ScriptLineNumber)': $($errorObj.Line). Error: $($errorObj.ErrorDetails)"
-    } else {
+    }
+    else {
         $auditMessage = "Could not update Planon-Persons account. Error: $($ex.Exception.Message)"
         Write-Warning "Error at Line '$($ex.InvocationInfo.ScriptLineNumber)': $($ex.InvocationInfo.Line). Error: $($ex.Exception.Message)"
     }

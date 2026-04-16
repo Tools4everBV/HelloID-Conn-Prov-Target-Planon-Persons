@@ -1,34 +1,55 @@
 [
   {
+    "defaultValue": "https://<companyName>.planoncloud.com",
     "key": "BaseUrl",
-    "type": "input",
-    "defaultValue": "https://planon.<companyName>.nl",
     "templateOptions": {
-      "label": "BaseUrl",
       "description": "The baseUrl to connect to the API",
-      "placeholder": "Please enter some text",
+      "label": "BaseUrl",
+      "placeholder": "",
       "required": true
-    }
+    },
+    "type": "input"
   },
   {
-    "key": "AuthToken",
-    "type": "input",
+    "defaultValue": "https://<companyName>-sso.planoncloud.com",
+    "key": "AuthURL",
+    "templateOptions": {
+      "description": "The authentication to the API",
+      "label": "AuthenticationURL",
+      "placeholder": "",
+      "required": true
+    },
+    "type": "input"
+  },
+  {
     "defaultValue": "",
+    "key": "ClientID",
     "templateOptions": {
-      "label": "Authentication Token",
-      "description": "The Authentication Token to connect to the API",
-      "type": "password",
+      "description": "The ClientID to connect to the API",
+      "label": "ClientID",
       "required": false
-    }
+    },
+    "type": "input"
   },
   {
-    "key": "RenameResources",
-    "type": "checkbox",
-    "defaultValue": false,
+    "defaultValue": "",
+    "key": "ClientSecret",
     "templateOptions": {
-      "label": "Rename resources",
+      "description": "The ClientSecret to connect to the API",
+      "label": "ClientSecret",
+      "required": false,
+      "type": "password"
+    },
+    "type": "input"
+  },
+  {
+    "defaultValue": false,
+    "key": "RenameResources",
+    "templateOptions": {
       "description": "When toggled, functions and departments will be renamed",
+      "label": "Rename resources",
       "required": false
-    }
+    },
+    "type": "checkbox"
   }
 ]

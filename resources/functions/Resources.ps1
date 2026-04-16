@@ -43,12 +43,23 @@ function Resolve-Planon-PersonsError {
 #endregion
 
 try {
-    Write-Information 'Setting authorization header'
-    $headers = @{
-        'Accept'       = 'application/json'
-        'Content-Type' = 'application/json'
-        Authorization  = "PLANONKEY accesskey=$($actionContext.Configuration.AuthToken)"
+    # Requesting authorization token
+    $splatRetrieveTokenParams = @{
+        Uri         = "$($actionContext.Configuration.AuthURL)/auth/realms/planon/protocol/openid-connect/token"
+        Method      = 'POST'
+        ContentType = 'application/x-www-form-urlencoded'
+        Body        = @{
+            client_id     = $($actionContext.Configuration.ClientId)
+            client_secret = $($actionContext.Configuration.ClientSecret)
+            grant_type    = "client_credentials"
+        }
     }
+    $responseToken = Invoke-RestMethod @splatRetrieveTokenParams
+
+    #create headers
+    $headers = [System.Collections.Generic.Dictionary[string, string]]::new()
+    $headers.Add('Authorization', "Bearer $($responseToken.access_token)")
+    $headers.Add("Content-Type", "application/json")
 
     Write-Information 'Retrieving all functions from Planon'
     $splatGetOrgUnitsParams = @{
@@ -112,7 +123,6 @@ try {
                 Write-Warning "[DryRun] Create Planon-Persons function resource with name: [$($resource.Name)]  and function: [$($resource.ExternalId)] will be executed during enforcement"
             }
         } catch {
-            $outputContext.Success = $false
             $ex = $PSItem
             if ($($ex.Exception.GetType().FullName -eq 'Microsoft.PowerShell.Commands.HttpResponseException') -or
                 $($ex.Exception.GetType().FullName -eq 'System.Net.WebException')) {
@@ -166,7 +176,6 @@ try {
                     Write-Warning "[DryRun] Rename Planon-Persons function resource from [$($currentResource.Function)] to [$($resource.Name)] with code: [$($resource.ExternalId)] will be executed during enforcement"
                 }
             } catch {
-                $outputContext.Success = $false
                 $ex = $PSItem
                 if ($($ex.Exception.GetType().FullName -eq 'Microsoft.PowerShell.Commands.HttpResponseException') -or
                     $($ex.Exception.GetType().FullName -eq 'System.Net.WebException')) {
@@ -184,9 +193,7 @@ try {
             }
         }
     }
-    $outputContext.Success = $true
 } catch {
-    $outputContext.Success = $false
     $ex = $PSItem
     if ($($ex.Exception.GetType().FullName -eq 'Microsoft.PowerShell.Commands.HttpResponseException') -or
         $($ex.Exception.GetType().FullName -eq 'System.Net.WebException')) {
@@ -202,3 +209,8 @@ try {
             IsError = $true
         })
 }
+finally {  
+    if (-not($outputContext.AuditLogs.IsError -contains $true)) {  
+        $outputContext.Success = $true  
+    }  
+}  

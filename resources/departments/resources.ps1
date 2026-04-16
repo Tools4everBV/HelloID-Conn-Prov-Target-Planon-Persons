@@ -43,16 +43,27 @@ function Resolve-Planon-PersonsError {
 #endregion
 
 try {
-    Write-Information 'Setting authorization header'
-    $headers = @{
-        'Accept'       = 'application/json'
-        'Content-Type' = 'application/json'
-        Authorization  = "PLANONKEY accesskey=$($actionContext.Configuration.AuthToken)"
+    # Requesting authorization token
+    $splatRetrieveTokenParams = @{
+        Uri         = "$($actionContext.Configuration.AuthURL)/auth/realms/planon/protocol/openid-connect/token"
+        Method      = 'POST'
+        ContentType = 'application/x-www-form-urlencoded'
+        Body        = @{
+            client_id     = $($actionContext.Configuration.ClientId)
+            client_secret = $($actionContext.Configuration.ClientSecret)
+            grant_type    = "client_credentials"
+        }
     }
+    $responseToken = Invoke-RestMethod @splatRetrieveTokenParams
+
+    #create headers
+    $headers = [System.Collections.Generic.Dictionary[string, string]]::new()
+    $headers.Add('Authorization', "Bearer $($responseToken.access_token)")
+    $headers.Add("Content-Type", "application/json")
 
     Write-Information 'Retrieving all organizational units from Planon'
     $splatGetOrgUnitsParams = @{
-        Uri     = "$($actionContext.Configuration.BaseUrl)/sdk/system/rest/v1/read/HelloIDAPIEenheden"
+        Uri     = "$($actionContext.Configuration.BaseUrl)/sdk/system/rest/v2/read/HelloIDAPIEenheden"
         Method  = 'POST'
         Body    = @{} | ConvertTo-Json
         Headers = $headers
@@ -65,6 +76,8 @@ try {
 
     $resourcesToCreate = [System.Collections.Generic.List[object]]::new()
     $resourcesToRename = [System.Collections.Generic.List[object]]::new()
+
+    if($actionContext.Configuration.RenameResources -eq $true){
     foreach ($resource in $resourceData) {
         if(-not([string]::IsNullOrEmpty($resource.ExternalId))){
             $exists = $organizationalUnitsGrouped["$($resource.ExternalId)"]
@@ -78,13 +91,14 @@ try {
             }
         }
     }
+}
 
     Write-Information "Creating [$($resourcesToCreate.Count)] resources"
     foreach ($resource in $resourcesToCreate) {
         try {
             if (-not ($actionContext.DryRun -eq $True)) {
                 $splatCreateResourceParams = @{
-                    Uri     = "$($actionContext.Configuration.BaseUrl)/sdk/system/rest/v1/execute/HelloIDAPIEenheden/BomAdd"
+                    Uri     = "$($actionContext.Configuration.BaseUrl)/sdk/system/rest/v2/execute/HelloIDAPIEenheden/BomAdd"
                     Method  = 'POST'
                     Body    = @{
                         values = @{
@@ -104,7 +118,6 @@ try {
                 Write-Warning "[DryRun] Create Planon-Persons department resource with code: [$($resource.ExternalId)] and name: [$($resource.DisplayName)]  will be executed during enforcement"
             }
         } catch {
-            $outputContext.Success = $false
             $ex = $PSItem
             if ($($ex.Exception.GetType().FullName -eq 'Microsoft.PowerShell.Commands.HttpResponseException') -or
                 $($ex.Exception.GetType().FullName -eq 'System.Net.WebException')) {
@@ -157,7 +170,6 @@ try {
                     Write-Warning "[DryRun] Rename Planon-Persons department resource from [$($currentResource.Name)] to [$($resource.DisplayName)] and from [$($currentResource.FreeString2)] to [$($resource.InternePostcode)]  with code: [$($resource.ExternalId)] will be executed during enforcement"
                 }
             } catch {
-                $outputContext.Success = $false
                 $ex = $PSItem
                 if ($($ex.Exception.GetType().FullName -eq 'Microsoft.PowerShell.Commands.HttpResponseException') -or
                     $($ex.Exception.GetType().FullName -eq 'System.Net.WebException')) {
@@ -175,10 +187,7 @@ try {
             }
         }
     }
-
-    $outputContext.Success = $true
 } catch {
-    $outputContext.Success = $false
     $ex = $PSItem
     if ($($ex.Exception.GetType().FullName -eq 'Microsoft.PowerShell.Commands.HttpResponseException') -or
         $($ex.Exception.GetType().FullName -eq 'System.Net.WebException')) {
@@ -194,3 +203,8 @@ try {
             IsError = $true
         })
 }
+finally {  
+    if (-not($outputContext.AuditLogs.IsError -contains $true)) {  
+        $outputContext.Success = $true  
+    }  
+}  

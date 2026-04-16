@@ -53,125 +53,6 @@
       ]
     },
     {
-      "Name": "DisplayTypeRef",
-      "Description": "Because of a API requirement a dollar sign will be added to the property name in the code.",
-      "Type": "Text",
-      "MappingActions": [
-        {
-          "MapForActions": [
-            "Create",
-            "Update"
-          ],
-          "MappingMode": "Fixed",
-          "Value": "\"1\"",
-          "UsedInNotifications": false,
-          "StoreInAccountData": false
-        }
-      ]
-    },
-    {
-      "Name": "RefBOStateUserDefined",
-      "Description": "Property needs to be populated with system code, there is no lookup in Planon so the system name will not suffice.",
-      "Type": "Text",
-      "MappingActions": [
-        {
-          "MapForActions": [
-            "Create",
-            "Update"
-          ],
-          "MappingMode": "Fixed",
-          "Value": "\"532\"",
-          "UsedInNotifications": false,
-          "StoreInAccountData": false
-        }
-      ]
-    },
-    {
-      "Name": "DepartmentRef",
-      "Description": "Because of a API requirement a dollar sign will be added to the property name in the code.",
-      "Type": "Text",
-      "MappingActions": [
-        {
-          "MapForActions": [
-            "Create",
-            "Update"
-          ],
-          "MappingMode": "Field",
-          "Value": "\"Person.PrimaryContract.Department.ExternalId\"",
-          "UsedInNotifications": false,
-          "StoreInAccountData": false
-        }
-      ]
-    },
-    {
-      "Name": "FreeString41",
-      "Description": "Gets filled with the manager reference during the account lifecycle.",
-      "Type": "Text",
-      "MappingActions": [
-        {
-          "MapForActions": [
-            "Create",
-            "Update"
-          ],
-          "MappingMode": "None",
-          "Value": "null",
-          "UsedInNotifications": false,
-          "StoreInAccountData": false
-        }
-      ]
-    },
-    {
-      "Name": "Code",
-      "Description": "",
-      "Type": "Text",
-      "MappingActions": [
-        {
-          "MapForActions": [
-            "Create",
-            "Update"
-          ],
-          "MappingMode": "Field",
-          "Value": "\"Person.ExternalId\"",
-          "UsedInNotifications": false,
-          "StoreInAccountData": false
-        }
-      ]
-    },
-    {
-      "Name": "FreeDate29",
-      "Description": "",
-      "Type": "Text",
-      "MappingActions": [
-        {
-          "MapForActions": [
-            "Create",
-            "Update"
-          ],
-          "MappingMode": "Complex",
-          "Value": "\"function getValue() {\\n    const date = new Date(); // Create the date object\\n    return date.toISOString().split('T')[0];\\n}\\n\\ngetValue();\"",
-          "UsedInNotifications": false,
-          "StoreInAccountData": false
-        }
-      ]
-    },
-    {
-      "Name": "OccupationPerc",
-      "Description": "",
-      "Type": "Text",
-      "MappingActions": [
-        {
-          "MapForActions": [
-            "Create",
-            "Update"
-          ],
-          "MappingMode": "Complex",
-          "Value": "\"function getValue() {\\n    let value = null\\n    for (let i = 0; i < Person.Contracts.count; i++) { \\n        if(Person.Contracts[i].Context.InConditions) {  \\n            value = value + Person.Contracts[i].Details.fte\\n        }\\n    }\\n    return (value * 100).toFixed(2)\\n}\\ngetValue();\\n\\n\"",
-          "UsedInNotifications": false,
-          "StoreInAccountData": false
-        }
-      ]
-    },
-    {
       "Name": "BeginDate",
       "Description": "",
       "Type": "Text",
@@ -200,40 +81,6 @@
           ],
           "MappingMode": "Complex",
           "Value": "\"function getValue() {\\r\\n    if(typeof Person.PrimaryContract.EndDate !== 'undefined' && Person.PrimaryContract.EndDate){\\r\\n        const date = new Date(Person.PrimaryContract.EndDate); // Create the date object\\r\\n        return date.toISOString().split('T')[0];\\r\\n    }\\r\\n    else {\\r\\n        return null;\\r\\n    }\\r\\n}\\r\\n\\r\\ngetValue();\"",
-          "UsedInNotifications": false,
-          "StoreInAccountData": false
-        }
-      ]
-    },
-    {
-      "Name": "EmploymenttypeRef",
-      "Description": "Because of a API requirement a dollar sign will be added to the property name in the code.",
-      "Type": "Text",
-      "MappingActions": [
-        {
-          "MapForActions": [
-            "Create",
-            "Update"
-          ],
-          "MappingMode": "Fixed",
-          "Value": "\"1\"",
-          "UsedInNotifications": false,
-          "StoreInAccountData": false
-        }
-      ]
-    },
-    {
-      "Name": "PersonPositionRef",
-      "Description": "",
-      "Type": "Text",
-      "MappingActions": [
-        {
-          "MapForActions": [
-            "Create",
-            "Update"
-          ],
-          "MappingMode": "Field",
-          "Value": "\"Person.PrimaryContract.Title.Code\"",
           "UsedInNotifications": false,
           "StoreInAccountData": false
         }
@@ -274,8 +121,8 @@
       ]
     },
     {
-      "Name": "PersonTypeRef",
-      "Description": "The 2 spaces before the number are necessary because of API requirements",
+      "Name": "FacilityNetUsername",
+      "Description": "",
       "Type": "Text",
       "MappingActions": [
         {
@@ -283,8 +130,42 @@
             "Create",
             "Update"
           ],
-          "MappingMode": "Fixed",
-          "Value": "\"  3\"",
+          "MappingMode": "Complex",
+          "Value": "\"function getSamAccountName() {\\r\\n    let samAccountName = '';\\r\\n\\r\\n    if (typeof Person.Accounts._ecafaa1586df4b0ab432602db477b376.userPrincipalName !== 'undefined' && Person.Accounts._ecafaa1586df4b0ab432602db477b376.userPrincipalName) {\\r\\n        samAccountName = Person.Accounts._ecafaa1586df4b0ab432602db477b376.userPrincipalName;\\r\\n    }\\r\\n\\r\\n    return samAccountName;\\r\\n}\\r\\n\\r\\ngetSamAccountName()\"",
+          "UsedInNotifications": false,
+          "StoreInAccountData": false
+        }
+      ]
+    },
+    {
+      "Name": "PersonPositionRef",
+      "Description": "",
+      "Type": "Text",
+      "MappingActions": [
+        {
+          "MapForActions": [
+            "Create",
+            "Update"
+          ],
+          "MappingMode": "Field",
+          "Value": "\"Person.PrimaryContract.Title.ExternalId\"",
+          "UsedInNotifications": false,
+          "StoreInAccountData": false
+        }
+      ]
+    },
+    {
+      "Name": "Code",
+      "Description": "",
+      "Type": "Text",
+      "MappingActions": [
+        {
+          "MapForActions": [
+            "Create",
+            "Update"
+          ],
+          "MappingMode": "Complex",
+          "Value": "\"\\\"S\\\" + Person.ExternalId\"",
           "UsedInNotifications": false,
           "StoreInAccountData": false
         }
@@ -301,15 +182,15 @@
             "Update"
           ],
           "MappingMode": "Complex",
-          "Value": "\"function getEmail() {\\n    let mail = '';\\n\\n    if (typeof Person.Accounts.MicrosoftActiveDirectory.mail !== 'undefined' && Person.Accounts.MicrosoftActiveDirectory.mail) {\\n        mail = Person.Accounts.MicrosoftActiveDirectory.mail;\\n    }\\n\\n    return mail;\\n}\\n\\ngetEmail();\"",
+          "Value": "\"function getEmail() {\\n    let mail = '';\\n\\n    if (typeof Person.Accounts._ecafaa1586df4b0ab432602db477b376.mailNickname !== 'undefined' && Person.Accounts._ecafaa1586df4b0ab432602db477b376.mailNickname) {\\n        mail = Person.Accounts._ecafaa1586df4b0ab432602db477b376.mailNickname + \\\"@siza.nl\\\";\\n    }\\n\\n    return mail;\\n}\\n\\ngetEmail();\"",
           "UsedInNotifications": false,
           "StoreInAccountData": false
         }
       ]
     },
     {
-      "Name": "FacilityNetUsername",
-      "Description": "",
+      "Name": "PersonTypeRef",
+      "Description": "The 2 spaces before the number are necessary because of API requirements",
       "Type": "Text",
       "MappingActions": [
         {
@@ -317,24 +198,69 @@
             "Create",
             "Update"
           ],
-          "MappingMode": "Complex",
-          "Value": "\"function getSamAccountName() {\\r\\n    let samAccountName = '';\\r\\n\\r\\n    if (typeof Person.Accounts.MicrosoftActiveDirectory.sAMAccountName !== 'undefined' && Person.Accounts.MicrosoftActiveDirectory.sAMAccountName) {\\r\\n        samAccountName = Person.Accounts.MicrosoftActiveDirectory.sAMAccountName;\\r\\n    }\\r\\n\\r\\n    return samAccountName;\\r\\n}\\r\\n\\r\\ngetSamAccountName()\"",
+          "MappingMode": "Fixed",
+          "Value": "\"   3\"",
           "UsedInNotifications": false,
           "StoreInAccountData": false
         }
       ]
     },
     {
-      "Name": "AddressRef",
-      "Description": "",
+      "Name": "RefBOStateUserDefined",
+      "Description": "Mendatory: Use EMPL10 for active or EMPL20 for inactive",
       "Type": "Text",
       "MappingActions": [
         {
           "MapForActions": [
-            "Create"
+            "Create",
+            "Enable"
           ],
           "MappingMode": "Fixed",
-          "Value": "\"8493\"",
+          "Value": "\"EMPL10\"",
+          "UsedInNotifications": false,
+          "StoreInAccountData": false
+        },
+        {
+          "MapForActions": [
+            "Disable",
+            "Delete"
+          ],
+          "MappingMode": "Fixed",
+          "Value": "\"EMPL20\"",
+          "UsedInNotifications": false,
+          "StoreInAccountData": false
+        }
+      ]
+    },
+    {
+      "Name": "CostCentreRef",
+      "Description": "Because of a API requirement a dollar sign will be added to the property name in the code.",
+      "Type": "Text",
+      "MappingActions": [
+        {
+          "MapForActions": [
+            "Create",
+            "Update"
+          ],
+          "MappingMode": "Field",
+          "Value": "\"Person.PrimaryContract.CostCenter.Code\"",
+          "UsedInNotifications": false,
+          "StoreInAccountData": false
+        }
+      ]
+    },
+    {
+      "Name": "DepartmentRef",
+      "Description": "Because of a API requirement a dollar sign will be added to the property name in the code.",
+      "Type": "Text",
+      "MappingActions": [
+        {
+          "MapForActions": [
+            "Create",
+            "Update"
+          ],
+          "MappingMode": "Field",
+          "Value": "\"Person.PrimaryContract.CostCenter.Code\"",
           "UsedInNotifications": false,
           "StoreInAccountData": false
         }
