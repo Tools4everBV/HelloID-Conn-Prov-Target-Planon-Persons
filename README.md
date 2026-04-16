@@ -1,13 +1,12 @@
 # HelloID-Conn-Prov-Target-Planon-Persons
 > [!WARNING]
-
-Planon uses an API which needs to be configured for each customer by a Planon consultant. Therefore this connector will **not work** out of the box without assistance from a Planon consultant and HelloID consultant.
+> Planon uses an API which needs to be configured for each customer by a Planon consultant. Therefore this connector will **not work** out of the box without assistance from a Planon consultant and HelloID consultant.
 
 > [!IMPORTANT]
 > This repository contains the connector and configuration code only. The implementer is responsible to acquire the connection details such as username, password, certificate, etc. You might even need to sign a contract or agreement with the supplier before implementing this connector. Please contact the client's application manager to coordinate the connector requirements.
 
 <p align="center">
-  <img src="https://www.tools4ever.nl/wp-content/webp-express/webp-images/uploads/2024/07/HelloID-Conn-Prov-Target-Planon-Order-300x80.png.webp">
+    <img src="https://github.com/Tools4everBV/HelloID-Conn-Prov-Target-Planon-Persons/blob/main/Logo.png?raw=true">
 </p>
 
 ## Table of contents
