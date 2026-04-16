@@ -118,7 +118,6 @@ try {
                 Write-Warning "[DryRun] Create Planon-Persons department resource with code: [$($resource.ExternalId)] and name: [$($resource.DisplayName)]  will be executed during enforcement"
             }
         } catch {
-            $outputContext.Success = $false
             $ex = $PSItem
             if ($($ex.Exception.GetType().FullName -eq 'Microsoft.PowerShell.Commands.HttpResponseException') -or
                 $($ex.Exception.GetType().FullName -eq 'System.Net.WebException')) {
@@ -171,7 +170,6 @@ try {
                     Write-Warning "[DryRun] Rename Planon-Persons department resource from [$($currentResource.Name)] to [$($resource.DisplayName)] and from [$($currentResource.FreeString2)] to [$($resource.InternePostcode)]  with code: [$($resource.ExternalId)] will be executed during enforcement"
                 }
             } catch {
-                $outputContext.Success = $false
                 $ex = $PSItem
                 if ($($ex.Exception.GetType().FullName -eq 'Microsoft.PowerShell.Commands.HttpResponseException') -or
                     $($ex.Exception.GetType().FullName -eq 'System.Net.WebException')) {
@@ -189,10 +187,7 @@ try {
             }
         }
     }
-
-    $outputContext.Success = $true
 } catch {
-    $outputContext.Success = $false
     $ex = $PSItem
     if ($($ex.Exception.GetType().FullName -eq 'Microsoft.PowerShell.Commands.HttpResponseException') -or
         $($ex.Exception.GetType().FullName -eq 'System.Net.WebException')) {
@@ -208,3 +203,8 @@ try {
             IsError = $true
         })
 }
+finally {  
+    if (-not($outputContext.AuditLogs.IsError -contains $true)) {  
+        $outputContext.Success = $true  
+    }  
+}  

@@ -1,6 +1,6 @@
 # HelloID-Conn-Prov-Target-Planon-Persons
-| :warning: Warning |
-| :---------------- |
+> [!WARNING]
+
 Planon uses an API which needs to be configured for each customer by a Planon consultant. Therefore this connector will **not work** out of the box without assistance from a Planon consultant and HelloID consultant.
 
 > [!IMPORTANT]

@@ -145,6 +145,15 @@ try {
             if ([String]::IsNullOrEmpty($actionContext.Data.PersonPositionRef)) {
                 $actionContext.Data.PSObject.Properties.Remove("`$PersonPositionRef")
             }
+            if ([String]::IsNullOrEmpty($actionContext.Data.CostCentreRef)) {
+                $actionContext.Data.PSObject.Properties.Remove("`$CostCentreRef")
+            }
+            if ([String]::IsNullOrEmpty($actionContext.Data.DepartmentRef)) {
+                $actionContext.Data.PSObject.Properties.Remove("`$DepartmentRef")
+            }
+            if ([String]::IsNullOrEmpty($actionContext.Data.RefBOStateUserDefined)) {
+                $actionContext.Data.PSObject.Properties.Remove("`$RefBOStateUserDefined")
+            }
 
             $actionContext.Data.PSObject.Properties.Remove('DepartmentRef')
             $actionContext.Data.PSObject.Properties.Remove('FreeString41')

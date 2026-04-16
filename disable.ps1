@@ -99,9 +99,18 @@ try {
         'DisableAccount' {
             # Rename properties to include "$" as property name prefix because of API specifications
             # Rename properties for correlatedAccount
-            $correlatedAccount | Add-Member @{
-                "`$RefBOStateUserDefined" = $actionContext.Data.RefBOStateUserDefined
-            } -Force
+
+            if ($actionContext.Origin -eq 'reconciliation') {
+                # During reconciliation, hardcoded values may need to be set as personContext and actionContext.Data are not available
+                $correlatedAccount | Add-Member @{
+                    "`$RefBOStateUserDefined" = "EMPL20"
+                } -Force
+            }
+            else {
+                $correlatedAccount | Add-Member @{
+                    "`$RefBOStateUserDefined" = $actionContext.Data.RefBOStateUserDefined
+                } -Force
+            }
 
             $correlatedAccount.PSObject.Properties.Remove('RefBOStateUserDefined')
 
@@ -156,22 +165,23 @@ try {
             break
         }   
    
-    }}
-    catch {
-        $outputContext.Success = $false
-        $ex = $PSItem
-        if ($($ex.Exception.GetType().FullName -eq 'Microsoft.PowerShell.Commands.HttpResponseException') -or
-            $($ex.Exception.GetType().FullName -eq 'System.Net.WebException')) {
-            $errorObj = Resolve-Planon-PersonsError -ErrorObject $ex
-            $auditMessage = "Could not disable Planon account. Error: $($errorObj.FriendlyMessage)"
-            Write-Warning "Error at Line '$($errorObj.ScriptLineNumber)': $($errorObj.Line). Error: $($errorObj.ErrorDetails)"
-        }
-        else {
-            $auditMessage = "Could not disable Planon account. Error: $($ex.Exception.Message)"
-            Write-Warning "Error at Line '$($ex.InvocationInfo.ScriptLineNumber)': $($ex.InvocationInfo.Line). Error: $($ex.Exception.Message)"
-        }
-        $outputContext.AuditLogs.Add([PSCustomObject]@{
-                Message = $auditMessage
-                IsError = $true
-            })
     }
+}
+catch {
+    $outputContext.Success = $false
+    $ex = $PSItem
+    if ($($ex.Exception.GetType().FullName -eq 'Microsoft.PowerShell.Commands.HttpResponseException') -or
+        $($ex.Exception.GetType().FullName -eq 'System.Net.WebException')) {
+        $errorObj = Resolve-Planon-PersonsError -ErrorObject $ex
+        $auditMessage = "Could not disable Planon account. Error: $($errorObj.FriendlyMessage)"
+        Write-Warning "Error at Line '$($errorObj.ScriptLineNumber)': $($errorObj.Line). Error: $($errorObj.ErrorDetails)"
+    }
+    else {
+        $auditMessage = "Could not disable Planon account. Error: $($ex.Exception.Message)"
+        Write-Warning "Error at Line '$($ex.InvocationInfo.ScriptLineNumber)': $($ex.InvocationInfo.Line). Error: $($ex.Exception.Message)"
+    }
+    $outputContext.AuditLogs.Add([PSCustomObject]@{
+            Message = $auditMessage
+            IsError = $true
+        })
+}

@@ -123,7 +123,6 @@ try {
                 Write-Warning "[DryRun] Create Planon-Persons function resource with name: [$($resource.Name)]  and function: [$($resource.ExternalId)] will be executed during enforcement"
             }
         } catch {
-            $outputContext.Success = $false
             $ex = $PSItem
             if ($($ex.Exception.GetType().FullName -eq 'Microsoft.PowerShell.Commands.HttpResponseException') -or
                 $($ex.Exception.GetType().FullName -eq 'System.Net.WebException')) {
@@ -177,7 +176,6 @@ try {
                     Write-Warning "[DryRun] Rename Planon-Persons function resource from [$($currentResource.Function)] to [$($resource.Name)] with code: [$($resource.ExternalId)] will be executed during enforcement"
                 }
             } catch {
-                $outputContext.Success = $false
                 $ex = $PSItem
                 if ($($ex.Exception.GetType().FullName -eq 'Microsoft.PowerShell.Commands.HttpResponseException') -or
                     $($ex.Exception.GetType().FullName -eq 'System.Net.WebException')) {
@@ -195,9 +193,7 @@ try {
             }
         }
     }
-    $outputContext.Success = $true
 } catch {
-    $outputContext.Success = $false
     $ex = $PSItem
     if ($($ex.Exception.GetType().FullName -eq 'Microsoft.PowerShell.Commands.HttpResponseException') -or
         $($ex.Exception.GetType().FullName -eq 'System.Net.WebException')) {
@@ -213,3 +209,8 @@ try {
             IsError = $true
         })
 }
+finally {  
+    if (-not($outputContext.AuditLogs.IsError -contains $true)) {  
+        $outputContext.Success = $true  
+    }  
+}  
