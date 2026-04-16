@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file. The format 
 ## [1.2.2] - 16-04-2026
 
 - Updated readme
+- Added latest workflows
 
 ## [1.2.1] - 23-03-2026
 
